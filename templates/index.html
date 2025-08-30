@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Primer PaaS - Flask en Azure</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+        .container {
+            background: white;
+            border-radius: 10px;
+            padding: 40px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+        .header h1 {
+            color: #4a5568;
+            margin-bottom: 10px;
+        }
+        .info-card {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .status {
+            display: inline-block;
+            background: #28a745;
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+        }
+        .endpoints {
+            margin-top: 30px;
+        }
+        .endpoint {
+            background: #007bff;
+            color: white;
+            padding: 10px 20px;
+            margin: 10px 5px;
+            border-radius: 5px;
+            text-decoration: none;
+            display: inline-block;
+            transition: background 0.3s;
+        }
+        .endpoint:hover {
+            background: #0056b3;
+            color: white;
+            text-decoration: none;
+        }
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            color: #6c757d;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🚀 Mi Primer PaaS</h1>
+            <span class="status">ACTIVO</span>
+        </div>
+        
+        <div class="info-card">
+            <h3>{{ message }}</h3>
+            <p><strong>Timestamp:</strong> {{ timestamp }}</p>
+            <p>Esta es una aplicación Flask básica desplegada en Azure Web App para practicar el despliegue de aplicaciones Python en la nube.</p>
+        </div>
+
+        <div class="endpoints">
+            <h3>Endpoints Disponibles:</h3>
+            <a href="/health" class="endpoint">Health Check</a>
+            <a href="/api/info" class="endpoint">App Info</a>
+            <a href="/test" class="endpoint">Test Endpoint</a>
+        </div>
+
+        <div class="info-card">
+            <h4>Características:</h4>
+            <ul>
+                <li>Framework: Python Flask</li>
+                <li>Servidor: Gunicorn (producción)</li>
+                <li>Plataforma: Azure Web App</li>
+                <li>Monitoreo: Health check endpoint</li>
+                <li>API REST: Endpoints JSON</li>
+            </ul>
+        </div>
+
+        <div class="footer">
+            <p>Aplicación Flask en Azure Web App | Para práctica de nube en CUGDL ✨</p>
+        </div>
+    </div>
+</body>
+</html>
