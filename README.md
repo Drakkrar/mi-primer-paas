@@ -68,21 +68,38 @@ miprimerpaas/
 ├── app.py                 # Aplicación principal de Flask
 ├── requirements.txt       # Dependencias de Python
 ├── startup.sh            # Script de inicio para Azure
+├── deploy.sh             # Script automatizado para despliegue ZIP
+├── run_local.sh          # Script para desarrollo local
 ├── templates/
 │   └── index.html        # Plantilla HTML principal
 ├── docs/
-│   └── deployment.md     # Documentación de despliegue
+│   └── deployment.md     # Documentación completa de despliegue
 └── README.md             # Este archivo
 ```
 
-## 🔧 Desarrollo
+## � Despliegue rápido en Azure
+
+**Método ZIP (Recomendado para pruebas rápidas):**
+```bash
+# Usando el script automatizado
+./deploy.sh
+
+# O manualmente
+zip -r mi-app.zip app.py requirements.txt startup.sh templates/
+az webapp deploy --resource-group mi-primer-paas-rg --name mi-primer-paas-webapp --src-path mi-app.zip --type zip
+```
+
+**Otros métodos:** Ver documentación completa en `docs/deployment.md`
+
+## �🔧 Desarrollo
 
 Para contribuir o modificar la aplicación:
 
-- Realiza cambios en `app.py` para la lógica del servidor
-- Modifica `templates/index.html` para cambios en la interfaz
-- Actualiza `requirements.txt` si agregas nuevas dependencias
-- Prueba localmente antes de desplegar
+1. Realiza cambios en `app.py` para la lógica del servidor
+2. Modifica `templates/index.html` para cambios en la interfaz  
+3. Actualiza `requirements.txt` si agregas nuevas dependencias
+4. Prueba localmente con `./run_local.sh`
+5. Despliega rápidamente con `./deploy.sh`
 
 ## 📝 Notas
 

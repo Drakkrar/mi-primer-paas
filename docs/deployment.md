@@ -109,7 +109,144 @@ az webapp deployment list-publishing-credentials \
 git push azure main
 ```
 
-### Método 2: Despliegue desde GitHub
+### Método 2: Despliegue mediante ZIP
+
+Este es el método **más rápido y sencillo** para desplegar tu aplicación Flask directamente desde un archivo ZIP.
+
+#### 1. Preparar el código para empaquetado
+```bash
+# Asegurar que todos los archivos están listos
+ls -la
+# Debes ver: app.py, requirements.txt, startup.sh, templates/
+```
+
+#### 2. Crear archivo ZIP con el código
+```bash
+# Crear ZIP con todos los archivos necesarios (excluyendo archivos innecesarios)
+zip -r mi-primer-paas.zip . -x "*.git*" "venv/*" "__pycache__/*" "*.pyc" ".env" "docs/*" "README.md" "run_local.sh"
+
+# O usar una versión más específica incluyendo solo lo necesario
+zip -r mi-primer-paas.zip app.py requirements.txt startup.sh templates/ .gitignore
+```
+
+#### 3. Verificar contenido del ZIP
+```bash
+# Ver contenido del archivo ZIP
+unzip -l mi-primer-paas.zip
+```
+
+El ZIP debe contener:
+```
+mi-primer-paas.zip
+├── app.py
+├── requirements.txt
+├── startup.sh
+├── templates/
+│   └── index.html
+└── .gitignore
+```
+
+#### 4. Desplegar usando az webapp deploy
+```bash
+# Desplegar directamente desde ZIP
+az webapp deploy \
+    --resource-group mi-primer-paas-rg \
+    --name mi-primer-paas-webapp \
+    --src-path mi-primer-paas.zip \
+    --type zip
+```
+
+#### 5. Verificar el despliegue
+```bash
+# Ver el estado del despliegue
+az webapp deployment list \
+    --resource-group mi-primer-paas-rg \
+    --name mi-primer-paas-webapp
+
+# Acceder a la aplicación
+az webapp browse \
+    --resource-group mi-primer-paas-rg \
+    --name mi-primer-paas-webapp
+```
+
+#### Ventajas del despliegue por ZIP:
+- ✅ **Rápido**: No requiere configurar Git
+- ✅ **Simple**: Un solo comando para desplegar
+- ✅ **Control**: Decides exactamente qué archivos incluir
+- ✅ **Reproducible**: Mismo ZIP = mismo despliegue
+- ✅ **Ideal para CI/CD**: Fácil de automatizar
+
+#### Script automatizado para despliegue ZIP:
+```bash
+#!/bin/bash
+# deploy.sh - Script automatizado para despliegue ZIP
+
+echo "📦 Creando paquete de despliegue..."
+
+# Variables
+RESOURCE_GROUP="mi-primer-paas-rg"
+WEBAPP_NAME="mi-primer-paas-webapp"
+ZIP_NAME="deploy-$(date +%Y%m%d-%H%M%S).zip"
+
+# Crear ZIP con archivos necesarios
+zip -r $ZIP_NAME app.py requirements.txt startup.sh templates/ -q
+
+echo "✅ Paquete creado: $ZIP_NAME"
+echo "🚀 Desplegando a Azure..."
+
+# Desplegar
+az webapp deploy \
+    --resource-group $RESOURCE_GROUP \
+    --name $WEBAPP_NAME \
+    --src-path $ZIP_NAME \
+    --type zip
+
+if [ $? -eq 0 ]; then
+    echo "✅ Despliegue exitoso!"
+    echo "🌐 URL: https://$WEBAPP_NAME.azurewebsites.net"
+    
+    # Limpiar archivo ZIP
+    rm $ZIP_NAME
+    echo "🧹 Archivo temporal eliminado"
+else
+    echo "❌ Error en el despliegue"
+    exit 1
+fi
+```
+
+#### Usando el script automatizado (Recomendado)
+Hemos incluido un script `deploy.sh` que automatiza todo el proceso:
+
+```bash
+# Hacer el script ejecutable (solo la primera vez)
+chmod +x deploy.sh
+
+# Desplegar con nombres por defecto
+./deploy.sh
+
+# O especificar nombres personalizados
+./deploy.sh mi-webapp-personalizada mi-grupo-recursos
+```
+
+**El script automatizado:**
+- ✅ Verifica la autenticación con Azure
+- ✅ Valida que la Web App existe
+- ✅ Comprueba archivos necesarios
+- ✅ Crea ZIP con archivos correctos
+- ✅ Despliega automáticamente
+- ✅ Verifica que la aplicación responde
+- ✅ Muestra URLs útiles
+- ✅ Limpia archivos temporales
+
+#### Comparación de métodos de despliegue:
+
+| Método | Velocidad | Complejidad | Mejor para |
+|--------|-----------|-------------|------------|
+| **ZIP** | ⚡ Muy rápido | 🟢 Simple | Despliegues rápidos, testing |
+| **Git local** | 🐌 Lento | 🟡 Medio | Desarrollo continuo |
+| **GitHub** | 🐌 Lento | 🟡 Medio | CI/CD, equipos |
+
+### Método 3: Despliegue desde GitHub
 
 #### 1. Subir código a GitHub
 ```bash
@@ -223,15 +360,51 @@ az webapp config show -n mi-primer-paas-webapp -g mi-primer-paas-rg
 - Asegurar que la app usa `os.environ.get('PORT')`
 - Verificar que Gunicorn usa `--bind 0.0.0.0:$PORT`
 
+**Problemas específicos del despliegue ZIP:**
+```bash
+# ZIP corrupto o incompleto
+unzip -t mi-primer-paas.zip  # Verificar integridad
+
+# Archivos faltantes en el ZIP
+unzip -l mi-primer-paas.zip  # Listar contenido
+
+# Recrear ZIP con archivos correctos
+zip -r mi-primer-paas.zip app.py requirements.txt startup.sh templates/
+```
+
+**Error de autenticación en Azure:**
+```bash
+# Renovar login
+az logout
+az login
+
+# Verificar suscripción activa
+az account show
+```
+
+**Web App no responde después del despliegue:**
+```bash
+# Reiniciar la Web App
+az webapp restart --name mi-primer-paas-webapp --resource-group mi-primer-paas-rg
+
+# Verificar configuración del comando de inicio
+az webapp config show --name mi-primer-paas-webapp --resource-group mi-primer-paas-rg --query linuxFxVersion
+```
 
 ## ✅ Lista de verificación pre-despliegue
 
+**Para despliegue ZIP:**
+- [ ] Archivos necesarios: `app.py`, `requirements.txt`, `startup.sh`, `templates/`
+- [ ] `startup.sh` con permisos de ejecución (`chmod +x startup.sh`)
+- [ ] ZIP no contiene archivos innecesarios (`.git`, `venv`, `__pycache__`)
+- [ ] Azure CLI instalado y autenticado (`az login`)
+- [ ] Web App creada y configurada en Azure
+- [ ] Script `deploy.sh` ejecutable (opcional pero recomendado)
+
+**General:**
 - [ ] `requirements.txt` actualizado con todas las dependencias
-- [ ] `startup.sh` con permisos de ejecución
 - [ ] App configurada para usar `$PORT` environment variable
 - [ ] Código testeado localmente
-- [ ] Repositorio Git inicializado
-- [ ] Azure CLI instalado y configurado
 - [ ] Recursos de Azure creados (Resource Group, App Service Plan, Web App)
 - [ ] Comando de inicio configurado en Azure
 - [ ] Variables de entorno configuradas (si las necesita)
